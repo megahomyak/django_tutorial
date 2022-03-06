@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.template import loader
 
 from polls.models import Question
 
@@ -6,11 +7,11 @@ from polls.models import Question
 def index(request):
     # noinspection PyUnresolvedReferences
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    response = ",<br>".join(
-        f'"{question.question_text}" - {question.pub_date}'
-        for question in latest_question_list
-    )
-    return HttpResponse(response)
+    template = loader.get_template("polls/index.html")
+    context = {
+        "latest_question_list": latest_question_list
+    }
+    return HttpResponse(template.render(context, request))
 
 
 def detail(request, question_id):
