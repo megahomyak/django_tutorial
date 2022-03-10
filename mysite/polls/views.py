@@ -2,7 +2,6 @@ from django.db.models import F
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from django.utils import timezone
 from django.views import generic
 
 from polls.models import Question, Choice
@@ -13,34 +12,25 @@ class IndexView(generic.ListView):
     context_object_name = "latest_question_list"
 
     def get_queryset(self):
-        # noinspection PyUnresolvedReferences
-        return Question.objects.filter(
-            pub_date__lte=timezone.now()
-        ).order_by("-pub_date")[:5]
+        return (
+            Question.get_published_questions_query().order_by("-pub_date")[:5]
+        )
 
 
-class DetailView(generic.DetailView):
+class ViewWithPublishedQuestions(generic.DetailView):
+
+    def get_queryset(self):
+        return Question.get_published_questions_query()
+
+
+class DetailView(ViewWithPublishedQuestions):
     model = Question
     template_name = "polls/detail.html"
 
-    def get_queryset(self):
-        """
-        Excludes any questions that aren't published yet.
-        """
-        # noinspection PyUnresolvedReferences
-        return Question.objects.filter(pub_date__lte=timezone.now())
 
-
-class ResultsView(generic.DetailView):
+class ResultsView(ViewWithPublishedQuestions):
     model = Question
     template_name = "polls/results.html"
-
-    def get_queryset(self):
-        """
-        Excludes any questions that aren't published yet.
-        """
-        # noinspection PyUnresolvedReferences
-        return Question.objects.filter(pub_date__lte=timezone.now())
 
 
 def vote(request, question_id):

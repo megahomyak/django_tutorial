@@ -19,6 +19,14 @@ class Question(models.Model):
             self.pub_date <= now
         ) and (self.pub_date + datetime.timedelta(days=1)) >= now
 
+    @classmethod
+    def get_published_questions_query(cls):
+        """
+        Excludes any questions that aren't published yet.
+        """
+        # noinspection PyUnresolvedReferences
+        return cls.objects.filter(pub_date__lte=timezone.now())
+
 
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
