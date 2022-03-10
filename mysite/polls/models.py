@@ -17,7 +17,7 @@ class Question(models.Model):
         # noinspection PyTypeChecker
         return (
             self.pub_date <= now
-        ) and self.pub_date >= (now - datetime.timedelta(days=1))
+        ) and (self.pub_date + datetime.timedelta(days=1)) >= now
 
 
 class Choice(models.Model):
