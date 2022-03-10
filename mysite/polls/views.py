@@ -39,6 +39,13 @@ def vote(request, question_id):
     else:
         selected_choice.votes = F("votes") + 1
         selected_choice.save()
+        # If I do that:...
+        # selected_choice.save()
+        # ...again, F would be applied again, and votes
+        # will be incremented by two!
+        # Fix:
+        selected_choice.refresh_from_db()
+        selected_choice.save()  # And now it's completely safe!
         return HttpResponseRedirect(
             reverse("polls:results", args=(question.id,))
         )
