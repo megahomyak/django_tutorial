@@ -13,8 +13,11 @@ class Question(models.Model):
 
     @property
     def was_published_recently(self):
+        now = timezone.now()
         # noinspection PyTypeChecker
-        return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
+        return (
+            self.pub_date <= now
+        ) and self.pub_date >= (now - datetime.timedelta(days=1))
 
 
 class Choice(models.Model):
