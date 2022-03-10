@@ -37,7 +37,16 @@ def vote(request, question_id):
             "error_message": "You didn't select a choice",
         })
     else:
+        # F applies the changes only when you save the object to the database...
         selected_choice.votes = F("votes") + 1
+        # ...but changes you made will still persist on the object, WITHOUT
+        # being shared between threads (manual test below). It means that if
+        # I change the value by 1 in one thread and by 1 in another, the value
+        # will still be incremented by 1 in each thread, but when saving to the
+        # database, these changes will merge.
+        # import time
+        # time.sleep(15)
+        # print(selected_choice.votes)
         selected_choice.save()
         # If I do that:...
         # selected_choice.save()
