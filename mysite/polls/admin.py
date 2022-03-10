@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Question, Choice
 
 
-class ChoiceInline(admin.StackedInline):
+class ChoiceInline(admin.TabularInline):
     model = Choice
     # 3 extra empty choice cards by default (NOT saved to the database when
     # you click "SAVE")
