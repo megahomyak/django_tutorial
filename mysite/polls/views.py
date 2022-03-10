@@ -13,14 +13,14 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         return (
-            Question.get_published_questions_query().order_by("-pub_date")[:5]
+            Question.get_valid_questions_query().order_by("-pub_date")[:5]
         )
 
 
 class ViewWithPublishedQuestions(generic.DetailView):
 
     def get_queryset(self):
-        return Question.get_published_questions_query()
+        return Question.get_valid_questions_query()
 
 
 class DetailView(ViewWithPublishedQuestions):

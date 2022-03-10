@@ -4,15 +4,20 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Question
+from .models import Question, Choice
 
 
 def create_question(question_text, days_bias):
     pub_date = timezone.now() + datetime.timedelta(days=days_bias)
     # noinspection PyUnresolvedReferences
-    return Question.objects.create(
-        question_text=question_text, pub_date=pub_date
+    question = Question.objects.create(
+        question_text=question_text, pub_date=pub_date,
     )
+    # noinspection PyUnresolvedReferences
+    Choice.objects.create(
+        question=question, choice_text="Choice text", votes=0,
+    ).save()
+    return question
 
 
 class QuestionModelTests(TestCase):
@@ -52,7 +57,7 @@ class QuestionIndexViewTests(TestCase):
         If no questions exist, an appropriate message is displayed.
         """
         response = self.client.get(reverse('polls:index'))
-        self.assertEqual(response.status_code, 200)
+        # Status code is checked in assertContains (default is 200)
         self.assertContains(response, "No polls are available.")
         self.assertQuerysetEqual(response.context['latest_question_list'], [])
 
@@ -152,3 +157,24 @@ class QuestionDetailViewTests(TestCase, GenericQuestionPageTests):
 
 class QuestionResultsViewTests(TestCase, GenericQuestionPageTests):
     viewname = "polls:results"
+
+
+class ValidQuestionsQueryTests(TestCase):
+
+    def get_detail(self, question):
+        url = reverse("polls:detail", args=(question.id,))
+        response = self.client.get(url)
+        return response
+
+    def test_question_with_choices(self):
+        question = create_question("Question text", days_bias=-1)
+        response = self.get_detail(question)
+        self.assertContains(response, question.question_text)
+
+    def test_question_without_choices(self):
+        # noinspection PyUnresolvedReferences
+        question = Question.objects.create(
+            question_text="Question text", pub_date=timezone.now(),
+        )
+        response = self.get_detail(question)
+        self.assertEqual(response.status_code, 404)

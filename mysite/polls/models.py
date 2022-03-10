@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.db.models import Exists, OuterRef
 from django.utils import timezone
 
 
@@ -20,12 +21,17 @@ class Question(models.Model):
         ) and (self.pub_date + datetime.timedelta(days=1)) >= now
 
     @classmethod
-    def get_published_questions_query(cls):
+    def get_valid_questions_query(cls):
         """
-        Excludes any questions that aren't published yet.
+        Excludes any questions that aren't published yet or do not have any
+        choices.
         """
         # noinspection PyUnresolvedReferences
-        return cls.objects.filter(pub_date__lte=timezone.now())
+        query = cls.objects.filter(
+            Exists(Choice.objects.filter(question=OuterRef("pk"))),
+            pub_date__lte=timezone.now(),
+        )
+        return query
 
 
 class Choice(models.Model):
