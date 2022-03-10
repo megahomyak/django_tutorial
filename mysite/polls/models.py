@@ -1,5 +1,6 @@
 import datetime
 
+from django.contrib import admin
 from django.db import models
 from django.db.models import Exists, OuterRef
 from django.utils import timezone
@@ -13,6 +14,11 @@ class Question(models.Model):
         return self.question_text
 
     @property
+    @admin.display(
+        boolean=True,
+        ordering='pub_date',
+        description='Published recently?',
+    )
     def was_published_recently(self):
         now = timezone.now()
         # noinspection PyTypeChecker
