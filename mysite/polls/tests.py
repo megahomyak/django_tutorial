@@ -44,6 +44,9 @@ class QuestionModelTests(TestCase):
         old_question = Question(pub_date=time)
         self.assertIs(old_question.was_published_recently, False)
 
+
+class QuestionIndexViewTests(TestCase):
+
     def test_no_questions(self):
         """
         If no questions exist, an appropriate message is displayed.
